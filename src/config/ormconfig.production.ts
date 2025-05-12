@@ -1,7 +1,7 @@
 import { Property } from 'src/entities/property.entity';
 import { PropertyFeature } from 'src/entities/propertyFeature.entity';
 import { PropertyType } from 'src/entities/propertyType.entity';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 import { PostgresConnectionOptions } from 'typeorm/driver/postgres/PostgresConnectionOptions';
 
 const configProd: PostgresConnectionOptions = {

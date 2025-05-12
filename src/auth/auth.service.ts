@@ -1,52 +1,61 @@
-import { Injectable } from '@nestjs/common';
-import { UserService } from 'src/user/user.service';
-import * as bcrypt from 'bcrypt';
-import { baseResponse } from 'src/common/response/base-response';
-import { throwIfNotFound } from 'src/common/exception/throw-helper';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/entities/user.entity';
+import * as bcrypt from 'bcrypt';
+import { AuthJwtPayload } from 'src/auth/types/auth-jwtPayload';
+import { baseResponse } from 'src/common/response/base-response';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private userService: UserService,
     private jwtService: JwtService,
+    // @Inject(refreshJwtConfig.KEY)
+    // private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  async validateUser(username: string, password: string) {
-    const user = await this.userService.findOneWithUserName(username.trim());
-    if (user && (await bcrypt.compare(password.trim(), user.password))) {
-      const { password, ...result } = user;
-      return baseResponse(result);
-    }
-    throwIfNotFound(user, `User with id ${username} not found`);
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
+    if (!user) throw new UnauthorizedException('User not found!');
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch)
+      throw new UnauthorizedException('Invalid credentials');
+
+    return { id: user.id };
   }
 
-  async login(user: User) {
-    const payload = {
-      username: user.email,
-      sub: {
-        name: user.firstName,
-      },
-    };
-
+  async login(userId: number) {
+    const payload: AuthJwtPayload = { sub: userId };
     return baseResponse({
-      ...user,
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),
-    });
+      id: userId,
+      token: this.jwtService.sign(payload),
+    },
+    'Đăng nhập thành công!'
+  );
   }
 
-  async refreshToken(user: User) {
-    const payload = {
-      username: user.email,
-      sub: {
-        name: user.firstName,
-      },
-    };
+  // async generateTokens(userId: number) {
+  //   const payload: AuthJwtPayload = { sub: userId };
+  //   const [accessToken, refreshToken] = await Promise.all([
+  //     this.jwtService.signAsync(payload),
+  //     this.jwtService.signAsync(payload, this.refreshTokenConfig),
+  //   ]);
+  //   return {
+  //     accessToken,
+  //     refreshToken,
+  //   };
+  // }
 
-    return baseResponse({
-      accessToken: this.jwtService.sign(payload),
-    });
-  }
+  // async refreshToken(user: User) {
+  //   const payload = {
+  //     username: user.email,
+  //     sub: {
+  //       name: user.firstName,
+  //     },
+  //   };
+
+  //   return baseResponse({
+  //     accessToken: this.jwtService.sign(payload),
+  //   });
+  // }
 }

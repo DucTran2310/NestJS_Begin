@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LocalStrategy } from 'src/auth/strategies/local-strategy';
-import { User } from 'src/entities/user.entity';
 import { UserService } from 'src/user/user.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from 'src/auth/strategies/jwt-strategy';
 import { RefreshJwtStrategy } from 'src/auth/strategies/refreshToken.strategy';
+import jwtConfig from 'src/auth/configs/jwt.config';
+import { User } from 'src/user/entities/user.entity';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   providers: [
@@ -21,10 +23,8 @@ import { RefreshJwtStrategy } from 'src/auth/strategies/refreshToken.strategy';
   controllers: [AuthController],
   imports: [
     TypeOrmModule.forFeature([User]),
-    JwtModule.register({
-      secret: `${process.env.JWT_SECRET}`,
-      signOptions: { expiresIn: '60s' },
-    }),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
+    ConfigModule.forFeature(jwtConfig)
   ],
 })
 export class AuthModule {}

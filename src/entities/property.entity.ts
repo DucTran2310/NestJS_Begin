@@ -10,7 +10,7 @@ import {
 } from 'typeorm';
 import { PropertyFeature } from 'src/entities/propertyFeature.entity';
 import { PropertyType } from 'src/entities/propertyType.entity';
-import { User } from 'src/entities/user.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Entity()
 export class Property {

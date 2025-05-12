@@ -1,10 +1,10 @@
 import { Property } from 'src/entities/property.entity';
 import { PropertyFeature } from 'src/entities/propertyFeature.entity';
 import { PropertyType } from 'src/entities/propertyType.entity';
-import { User } from 'src/entities/user.entity';
 import { DataSource } from 'typeorm';
 import { Seeder, SeederFactoryManager } from 'typeorm-extension';
 import { faker } from '@faker-js/faker';
+import { User } from 'src/user/entities/user.entity';
 
 export class MainSeeder implements Seeder {
   public async run(

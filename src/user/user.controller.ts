@@ -1,50 +1,42 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  UseGuards
-} from '@nestjs/common';
-import { CreateUserDTO, UpdateUserDTO } from 'src/user/dto/createUserDto';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
-import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDTO } from 'src/user/dto/create-user.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-    // private readonly commentService: CommentService,
-  ) {}
-
-  @Get('/all')
-  findAllUser() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findUserByID(@Param('id') id: number) {
-    return this.userService.findOne(id);
-  }
+  constructor(private readonly userService: UserService) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDTO) {
     return this.userService.create(createUserDto);
   }
 
-  @Put(':id')
-  updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateUserDto: UpdateUserDTO,
-  ) {
-    return this.userService.update(id, updateUserDto);
+  @Get()
+  findAll() {
+    return this.userService.findAll();
   }
 
-  // @UseGuards(JwtGuard)
-  // @Get(':id/comments')
-  // getUserComment(@Param('id') id: string) {
-  //   return this.commentService.findUserComment(id);
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Req() req) {
+    console.log('VVVREQ: ', req.user.id)
+    return this.userService.findOne(req.user.id);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.userService.findOne(+id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(+id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.userService.remove(+id);
+  }
 }
