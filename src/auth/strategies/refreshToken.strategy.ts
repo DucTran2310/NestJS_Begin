@@ -3,17 +3,17 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 
 export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh',
+  'refresh-jwt',
 ) {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromBodyField('refresh'),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: `${process.env.jwt_secret}`,
+      secretOrKey: `${process.env.REFRESH_JWT_SECRET}`,
     });
   }
 
   async validate(payload: any) {
     return { user: payload.sub, username: payload.username };
   }
-}
+} 
