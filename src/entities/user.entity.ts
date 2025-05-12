@@ -1,30 +1,57 @@
 import {
   BeforeInsert,
-  BeforeUpdate,
   Column,
+  CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Property } from './property.entity';
+
 import * as bcrypt from 'bcrypt';
-import { Comment } from 'src/entities/comment.entity';
+import { Role } from 'src/auth/enums/role.enum';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, nullable: true })
-  name: string;
+  @Column()
+  firstName: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column()
+  lastName: string;
+
+  @Column()
   email: string;
 
-  @Column({ nullable: false })
+  @Column({ nullable: true })
+  avatarUrl: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @Column()
   password: string;
 
-  @OneToMany((type) => Comment, (comment) => comment.user)
-  comments: Comment[];
+  @Column({
+    type: 'enum',
+    enum: Role,
+    default: Role.USER,
+  })
+  role: Role;
+
+  @Column({ nullable: true })
+  hashedRefreshToken: string;
+
+  @OneToMany(() => Property, (property) => property.user)
+  properties: Property[];
+
+  @ManyToMany(() => Property, (property) => property.likedBy)
+  @JoinTable({ name: 'user_liked_properties' })
+  likedProperties: Property[];
 
   @BeforeInsert()
   async hashPassword() {

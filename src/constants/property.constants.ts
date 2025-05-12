@@ -1,0 +1,1 @@
+export const CREATE_PROPERTY_SUCCESS = 'Tạo thuộc tính thành công'
